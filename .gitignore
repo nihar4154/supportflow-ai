@@ -1,0 +1,35 @@
+# Maven build output
+target/
+
+# Local credentials and environment files
+.env
+.env.*
+!.env.example
+application-local.yml
+application-local.yaml
+application-local.properties
+application-secrets.*
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+
+# Local infrastructure data and logs
+/data/
+/volumes/
+*.log
+logs/
+
+# IDE and operating system files
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+.DS_Store
+Thumbs.db
+
+# Keep the Maven wrapper tracked when added
+!.mvn/wrapper/maven-wrapper.jar
