@@ -17,6 +17,7 @@ application-secrets.*
 
 # Local infrastructure data and logs
 /data/
+/support-agent/data/
 /volumes/
 *.log
 logs/

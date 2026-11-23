@@ -20,13 +20,17 @@ repositories {
 extra["springAiVersion"] = "2.1.0-M1"
 
 dependencies {
-	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("org.springframework.boot:spring-boot-starter-webmvc")
+	implementation("org.springframework.boot:spring-boot-starter-mail")
+	implementation("org.springframework.ai:spring-ai-starter-model-openai")
 	implementation("org.springframework.ai:spring-ai-starter-mcp-client")
+	// Include both macOS architectures so Netty selects the native DNS resolver
+	// matching the JVM. Other operating systems continue using their own resolver.
+	runtimeOnly("io.netty:netty-resolver-dns-native-macos::osx-aarch_64")
+	runtimeOnly("io.netty:netty-resolver-dns-native-macos::osx-x86_64")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 	developmentOnly("org.springframework.boot:spring-boot-docker-compose")
 	developmentOnly("org.springframework.ai:spring-ai-spring-boot-docker-compose")
-	testImplementation("org.springframework.boot:spring-boot-starter-data-jpa-test")
 	testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
@@ -35,6 +39,10 @@ dependencyManagement {
 	imports {
 		mavenBom("org.springframework.ai:spring-ai-bom:${property("springAiVersion")}")
 	}
+}
+
+tasks.bootRun {
+	systemProperty("spring.docker.compose.file", project.file("compose.yaml").absolutePath)
 }
 
 tasks.withType<Test> {

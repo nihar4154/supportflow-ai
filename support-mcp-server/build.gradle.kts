@@ -20,9 +20,12 @@ repositories {
 extra["springAiVersion"] = "2.1.0-M1"
 
 dependencies {
+	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("org.springframework.boot:spring-boot-starter-webmvc")
 	implementation("org.springframework.ai:spring-ai-starter-mcp-server-webmvc")
+	runtimeOnly("com.mysql:mysql-connector-j")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
+	developmentOnly("org.springframework.boot:spring-boot-docker-compose")
 	testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
@@ -31,6 +34,10 @@ dependencyManagement {
 	imports {
 		mavenBom("org.springframework.ai:spring-ai-bom:${property("springAiVersion")}")
 	}
+}
+
+tasks.bootRun {
+	systemProperty("spring.docker.compose.file", project.file("compose.yaml").absolutePath)
 }
 
 tasks.withType<Test> {

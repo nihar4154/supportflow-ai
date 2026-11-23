@@ -73,7 +73,7 @@ Java packages will use the root `io.github.nihar4154.supportflow`, with `agent` 
 
 The [schema](support-mcp-server/db/init/01-schema.sql) and [sample data](support-mcp-server/db/init/02-seed.sql) define the `supportflow` MySQL database. The sample records cover repeat product issues and a duplicate charge. These scripts run in filename order when MySQL initializes a **new** data volume; they do not rerun on every application start.
 
-To start the database locally, run `docker compose -f support-mcp-server/compose.yaml up -d` from the repository root. MySQL is exposed on `localhost:3306`. The application does not connect to these tables yet; data access is part of the next implementation milestone.
+During development, the MCP server starts MySQL through Docker Compose and leaves it running when the application stops. Start the app with `cd support-mcp-server && ./gradlew bootRun`, or run its main class in IntelliJ with the repository root as the working directory. Docker Desktop must be running. MySQL is exposed on `localhost:3306`. To use a different working directory when running the main class, set `SUPPORTFLOW_COMPOSE_FILE` to the path of `support-mcp-server/compose.yaml`. Spring Boot's Compose service connection takes precedence over datasource environment variables while Compose integration is enabled; set `spring.docker.compose.enabled=false` when connecting to another database.
 
 ```mermaid
 erDiagram
