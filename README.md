@@ -47,15 +47,15 @@ The model will propose actions; application code will determine whether they are
 
 | Area | Planned stack |
 | --- | --- |
-| Application | Java, Spring Boot, Maven |
+| Application | Java, Spring Boot, Gradle |
 | AI integration | Spring AI, MCP, retrieval-augmented generation (RAG) |
-| Data | MySQL, Spring Data JPA, Flyway |
+| Data | MySQL schema and sample data; Spring Data JPA and migrations planned |
 | Local environment | Docker Compose, Mailpit |
 | Testing and monitoring | JUnit, Testcontainers, Spring Boot Actuator, Micrometer |
 
 ## Project structure
 
-The applications will share a Maven parent build and run independently. This layout will be added as implementation progresses:
+The applications currently have separate Gradle builds and will run independently:
 
 ```text
 supportflow-ai/
@@ -63,11 +63,34 @@ supportflow-ai/
 ├── support-mcp-server/   # Business services and MCP tools
 ├── demo/                 # Sample emails and repeatable scenarios
 ├── docs/                 # Architecture and setup guides
-├── pom.xml               # Parent Maven build
-└── compose.yaml          # Local infrastructure
+├── support-agent/build.gradle.kts
+└── support-mcp-server/compose.yaml  # Local MySQL
 ```
 
 Java packages will use the root `io.github.nihar4154.supportflow`, with `agent` and `mcp` branches. Within each application, code will be grouped by feature, such as `email`, `payment`, and `refund`.
+
+## Database relationships
+
+The [schema](support-mcp-server/db/init/01-schema.sql) and [sample data](support-mcp-server/db/init/02-seed.sql) define the `supportflow` MySQL database. The sample records cover repeat product issues and a duplicate charge. These scripts run in filename order when MySQL initializes a **new** data volume; they do not rerun on every application start.
+
+To start the database locally, run `docker compose -f support-mcp-server/compose.yaml up -d` from the repository root. MySQL is exposed on `localhost:3306`. The application does not connect to these tables yet; data access is part of the next implementation milestone.
+
+```mermaid
+erDiagram
+    customers ||--o{ orders : places
+    customers ||--o{ support_tickets : opens
+    orders ||--o{ order_items : contains
+    products ||--o{ order_items : appears_in
+    orders ||--o{ payments : has
+    orders ||--o{ refunds : has
+    payments o|--o{ refunds : linked_to
+    orders o|--o{ support_tickets : concerns
+    products o|--o{ support_tickets : concerns
+```
+
+Each order belongs to one customer. `order_items` links orders to products and records the quantity and price paid. An order can have several payment attempts or captured charges, which lets the demo represent a duplicate charge. Each refund belongs to an order and may reference a specific payment. Every support ticket belongs to a customer; its order and product references are optional.
+
+Foreign keys ensure referenced rows exist. Business rules still need application checks: a refund's payment must belong to the same order, the refundable amount must be valid, and a ticket's order must belong to its customer. These checks are not implemented yet.
 
 ## Roadmap
 
