@@ -1,5 +1,7 @@
 plugins {
 	java
+	pmd
+	id("com.diffplug.spotless") version "8.12.0"
 	id("org.springframework.boot") version "4.2.0"
 	id("io.spring.dependency-management") version "1.1.7"
 }
@@ -42,4 +44,18 @@ tasks.bootRun {
 
 tasks.withType<Test> {
 	useJUnitPlatform()
+}
+
+pmd {
+    toolVersion = "7.29.0"
+    ruleSets = listOf("category/java/errorprone.xml")
+    isIgnoreFailures = false
+}
+
+spotless {
+    // Apply the formatting standard to files changed relative to the default branch.
+    ratchetFrom("origin/main")
+    java {
+        googleJavaFormat("1.30.0")
+    }
 }
