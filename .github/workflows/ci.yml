@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  support-agent:
+    name: Support agent
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Build and test
+        working-directory: support-agent
+        run: ./gradlew build --no-daemon
+
+  support-mcp-server:
+    name: MCP server
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_DATABASE: supportflow
+          MYSQL_USER: supportflow
+          MYSQL_PASSWORD: localdev
+          MYSQL_ROOT_PASSWORD: localroot
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -uroot -plocalroot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Initialize database
+        run: |
+          docker exec -i ${{ job.services.mysql.id }} mysql -uroot -plocalroot < support-mcp-server/db/init/01-schema.sql
+          docker exec -i ${{ job.services.mysql.id }} mysql -uroot -plocalroot < support-mcp-server/db/init/02-seed.sql
+      - name: Build and test
+        working-directory: support-mcp-server
+        env:
+          SPRING_DOCKER_COMPOSE_ENABLED: 'false'
+        run: ./gradlew build --no-daemon
