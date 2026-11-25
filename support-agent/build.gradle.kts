@@ -1,5 +1,7 @@
 plugins {
 	java
+	pmd
+	id("com.diffplug.spotless") version "8.12.0"
 	id("org.springframework.boot") version "4.2.0"
 	id("io.spring.dependency-management") version "1.1.7"
 }
@@ -47,4 +49,19 @@ tasks.bootRun {
 
 tasks.withType<Test> {
 	useJUnitPlatform()
+}
+
+pmd {
+    toolVersion = "7.29.0"
+    ruleSets = emptyList()
+    ruleSetFiles = files("../config/pmd/ruleset.xml")
+    isIgnoreFailures = false
+}
+
+spotless {
+    // Enforce formatting on files changed since the initial adoption baseline.
+    ratchetFrom("e7139e259e6a5ff425307a96b91da58648b6ae36")
+    java {
+        googleJavaFormat("1.30.0")
+    }
 }

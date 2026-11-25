@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<ruleset name="SupportFlow Java rules"
+         xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.github.io/schema/ruleset_2_0_0.xsd">
+    <description>Catch common Java errors while preserving current exception handling and type containers.</description>
+    <rule ref="category/java/errorprone.xml">
+        <!-- Existing service boundaries intentionally catch failures to retry messages. -->
+        <exclude name="AvoidCatchingGenericException"/>
+        <!-- The project groups related enums and DTO records in non-instantiable classes. -->
+        <exclude name="MissingStaticMethodInNonInstantiatableClass"/>
+        <!-- Existing code compares collection sizes to one. -->
+        <exclude name="AvoidLiteralsInIfCondition"/>
+    </rule>
+</ruleset>

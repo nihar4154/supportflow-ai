@@ -18,6 +18,8 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -26,6 +28,13 @@ jobs:
       - name: Build and test
         working-directory: support-agent
         run: ./gradlew build --no-daemon
+      - name: Show PMD violations
+        if: failure()
+        working-directory: support-agent
+        run: |
+          for report in build/reports/pmd/*.xml; do
+            if [ -f "$report" ]; then cat "$report"; fi
+          done
 
   support-mcp-server:
     name: MCP server
@@ -48,6 +57,8 @@ jobs:
           --health-retries=12
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -62,3 +73,10 @@ jobs:
         env:
           SPRING_DOCKER_COMPOSE_ENABLED: 'false'
         run: ./gradlew build --no-daemon
+      - name: Show PMD violations
+        if: failure()
+        working-directory: support-mcp-server
+        run: |
+          for report in build/reports/pmd/*.xml; do
+            if [ -f "$report" ]; then cat "$report"; fi
+          done
