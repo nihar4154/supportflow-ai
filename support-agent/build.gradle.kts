@@ -53,13 +53,14 @@ tasks.withType<Test> {
 
 pmd {
     toolVersion = "7.29.0"
-    ruleSets = listOf("category/java/errorprone.xml")
+    ruleSets = emptyList()
+    ruleSetFiles = files("../config/pmd/ruleset.xml")
     isIgnoreFailures = false
 }
 
 spotless {
-    // Apply the formatting standard to files changed relative to the default branch.
-    ratchetFrom("origin/main")
+    // Enforce formatting on files changed since the initial adoption baseline.
+    ratchetFrom("e7139e259e6a5ff425307a96b91da58648b6ae36")
     java {
         googleJavaFormat("1.30.0")
     }
