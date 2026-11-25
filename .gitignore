@@ -1,3 +1,7 @@
+# Gradle cache and build output
+.gradle/
+build/
+
 # Maven build output
 target/
 
