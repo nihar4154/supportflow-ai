@@ -1,0 +1,17 @@
+local.file_match "apps" {
+  path_targets = [
+    {"__path__" = "/logs/support-agent.log", "service_name" = "support-agent"},
+    {"__path__" = "/logs/support-mcp-server.log", "service_name" = "support-mcp-server"},
+  ]
+}
+
+loki.source.file "apps" {
+  targets    = local.file_match.apps.targets
+  forward_to = [loki.write.local.receiver]
+}
+
+loki.write "local" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+}

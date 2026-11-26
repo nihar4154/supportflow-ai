@@ -22,6 +22,9 @@ repositories {
 extra["springAiVersion"] = "2.1.0-M1"
 
 dependencies {
+	implementation("org.springframework.boot:spring-boot-starter-actuator")
+	implementation("org.springframework.boot:spring-boot-starter-opentelemetry")
+	runtimeOnly("io.micrometer:micrometer-registry-prometheus")
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("org.springframework.boot:spring-boot-starter-webmvc")
 	implementation("org.springframework.ai:spring-ai-starter-mcp-server-webmvc")

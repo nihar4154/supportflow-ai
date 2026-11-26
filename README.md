@@ -109,3 +109,21 @@ The demo will use synthetic customer data, Mailpit for email, and simulated paym
 Evaluation will measure whether decisions are correct, replies are supported by evidence, and actions respect permissions. Latency and model usage will also be recorded.
 
 Setup instructions will be added with the first runnable version.
+
+## Local monitoring and tracing
+
+From the repository root, start the monitoring stack before starting or restarting the two Java applications on the host.
+
+```sh
+docker compose -f observability/compose.yaml up -d
+```
+
+Open [Prometheus targets](http://localhost:9090/targets) and check that both applications are UP. Prometheus scrapes their Actuator endpoints every ten seconds. Open the [SupportFlow email dashboard](http://localhost:3000/d/supportflow-email) in Grafana (initial local login `admin` / `admin`). It shows scrape health, cumulative email attempts by outcome, and recent mean processing times. Email metrics appear after a message has been handled. Duration averages require traffic during the five-minute window.
+
+Send a demo email, then open [Jaeger](http://localhost:16686), select `support-agent`, and search for `support.email.handle`. Each handling attempt includes resolution and reply stages as reached. The agent console includes the active trace ID. In Grafana Explore, choose the Jaeger datasource to look up that ID. A skipped reply means the mail sender found no usable recipient or reply body. A failed attempt returns the email to the existing retry path.
+
+The local configuration samples all traces. Override `MANAGEMENT_TRACING_SAMPLING_PROBABILITY` and `MANAGEMENT_OPENTELEMETRY_TRACING_EXPORT_OTLP_ENDPOINT` for other environments. Jaeger keeps local traces in memory. Stop the monitoring containers with `docker compose -f observability/compose.yaml down`.
+
+The Runtime logs panel displays application output collected by Alloy from `~/.supportflow/logs` and stored in Loki. Restart each Java app after enabling file logging. In Grafana Explore select Loki and query `{service_name="support-agent"} |= "Handing email"` to find processing attempts.
+
+Both services emit newline-delimited Logstash JSON to the console and log file. Events inside a traced operation include Micrometer’s `traceId` and `spanId`. In Grafana Explore, expand an event and choose **Open in Jaeger**. To filter by trace, use `{service_name=~"support-agent|support-mcp-server"} | json | traceId="<trace ID>"`.
